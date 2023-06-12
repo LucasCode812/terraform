@@ -1,3 +1,4 @@
+# Deploy NagiosXI Inside PrivateSubnet
 resource "aws_instance" "Nagios" {
   ami                         = "ami-053b0d53c279acc90"
   instance_type               = "c4.large"
@@ -18,6 +19,7 @@ resource "aws_instance" "Nagios" {
   ]
 }
 
+# Define Bashscript
 data "template_file" "nagios_data" {
   template = file("${path.module}/scripts/nagios.sh")
 }

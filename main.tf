@@ -1,7 +1,9 @@
+# Set AWS as provider
 provider "aws" {
   region = "us-east-1"
 }
 
+# Create a VPC
 resource "aws_vpc" "my_vpc" {
   cidr_block = "10.0.0.0/16"
 
@@ -10,6 +12,7 @@ resource "aws_vpc" "my_vpc" {
   }
 }
 
+# Create a PublicSubnet
 resource "aws_subnet" "public_subnet" {
   vpc_id            = aws_vpc.my_vpc.id
   cidr_block        = "10.0.1.0/24"
@@ -20,6 +23,7 @@ resource "aws_subnet" "public_subnet" {
   }
 }
 
+# Create a PrivateSubnet
 resource "aws_subnet" "private_subnet" {
   vpc_id            = aws_vpc.my_vpc.id
   cidr_block        = "10.0.2.0/24"
@@ -30,6 +34,7 @@ resource "aws_subnet" "private_subnet" {
   }
 }
 
+# Create a IntetnetGateway
 resource "aws_internet_gateway" "internet_gateway" {
   vpc_id = aws_vpc.my_vpc.id
 
@@ -38,6 +43,7 @@ resource "aws_internet_gateway" "internet_gateway" {
   }
 }
 
+# Create a PublicRouteTable
 resource "aws_route_table" "public_route_table" {
   vpc_id = aws_vpc.my_vpc.id
   tags = {
@@ -50,11 +56,13 @@ resource "aws_route_table" "public_route_table" {
   }
 }
 
+# Link PublicSubnet with RouteTable
 resource "aws_route_table_association" "public_route_association" {
   subnet_id      = aws_subnet.public_subnet.id
   route_table_id = aws_route_table.public_route_table.id
 }
 
+# Create a PrivateRouteTable
 resource "aws_route_table" "private_route_table" {
   vpc_id = aws_vpc.my_vpc.id
 
@@ -68,11 +76,13 @@ resource "aws_route_table" "private_route_table" {
   }
 }
 
+# Link PrivateSubnet with RouteTable
 resource "aws_route_table_association" "private_route_association" {
   subnet_id      = aws_subnet.private_subnet.id
   route_table_id = aws_route_table.private_route_table.id
 }
 
+# Create PublicSecurityGroup
 resource "aws_security_group" "public_sg" {
   name        = "PublicSecurityGroup"
   description = "Allow SSH, HTTP, HTTPS, and ICMP traffic"
@@ -136,6 +146,7 @@ resource "aws_security_group" "public_sg" {
   }
 }
 
+# Create PrivateSecurityGroup
 resource "aws_security_group" "private_sg" {
   name        = "PrivateSecurityGroup"
   description = "Allow SSH"

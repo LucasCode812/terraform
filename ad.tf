@@ -1,8 +1,10 @@
+# Set AWS keypair
 resource "aws_key_pair" "AWS_KEY" {
   key_name   = "RDPKEY"
-  public_key = file("C:/Users/lucas/Desktop/TerraformAWS/sshkey/RDPKEY.pub")
+  public_key = file("Filepath/TerraformAWS/sshkey/RDPKEY.pub")
 }
 
+# Deploy ActiveDirectory Inside PrivateSubnet
 resource "aws_instance" "ActiveDirectory" {
   ami                         = "ami-0d86c69530d0a048e"
   instance_type               = "c4.large"
@@ -25,6 +27,7 @@ resource "aws_instance" "ActiveDirectory" {
 
 }
 
+# Define Bashscript
 data "template_file" "ad_data" {
   template = file("${path.module}/scripts/ad.sh")
 }

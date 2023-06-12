@@ -1,11 +1,14 @@
 #!/bin/bash
 
 # install SNORT
+# Become sudo
 sudo su
 
+# Update system
 apt update
 apt upgrade -y
 
+# Install dependencies
 apt install build-essential libpcap-dev libpcre3-dev \
 libnet1-dev zlib1g-dev luajit hwloc libdnet-dev \
 libdumbnet-dev bison flex liblzma-dev openssl libssl-dev \
@@ -13,8 +16,10 @@ pkg-config libhwloc-dev cmake cpputest libsqlite3-dev uuid-dev \
 libcmocka-dev libnetfilter-queue-dev libmnl-dev autotools-dev \
 libluajit-5.1-dev libunwind-dev libfl-dev -y
 
+# Create Snort directory
 mkdir /home/ubuntu/snort-source-files && cd /home/ubuntu/snort-source-files/
 
+# install libdaq
 git clone https://github.com/snort3/libdaq.git
 cd /home/ubuntu/snort-source-files/libdaq
 ./bootstrap
@@ -22,6 +27,7 @@ cd /home/ubuntu/snort-source-files/libdaq
 make
 make install
 
+# Install gperftools
 cd /home/ubuntu/snort-source-files/
 wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.9.1/gperftools-2.9.1.tar.gz
 tar xzf gperftools-2.9.1.tar.gz
@@ -30,12 +36,14 @@ cd /home/ubuntu/snort-source-files/gperftools-2.9.1/
 make
 make install
 
+# Pre-install Snort3
 cd /home/ubuntu/snort-source-files/
 wget https://github.com/snort3/snort3/archive/refs/tags/3.1.28.0.tar.gz
 tar xzf 3.1.28.0.tar.gz
 cd /home/ubuntu/snort-source-files/snort3-3.1.28.0
 ./configure_cmake.sh --prefix=/usr/local --enable-tcmalloc
 
+# Install Snort3
 cd /home/ubuntu/snort-source-files/snort3-3.1.28.0/build
 make
 make install
@@ -47,6 +55,7 @@ ip add sh ens3
 ethtool -k ens3 | grep receive-offload
 ethtool -K ens3 gro off lro off
 
+# Snort3-nic Service
 cat > /etc/systemd/system/snort3-nic.service << 'EOL'
 [Unit]
 Description=Set Snort 3 NIC in promiscuous mode and Disable GRO, LRO on boot
@@ -55,7 +64,7 @@ After=network.target
 [Service]
 Type=oneshot
 ExecStart=/usr/sbin/ip link set dev ens3 promisc on
-ExecStart=/usr/sbin/ethtool -K ens4 gro off lro off
+ExecStart=/usr/sbin/ethtool -K ens3 gro off lro off
 TimeoutStartSec=0
 RemainAfterExit=yes
 
@@ -75,7 +84,7 @@ https://www.snort.org/downloads/community/snort3-community-rules.tar.gz \
 # Configuration file path
 config_file="/usr/local/etc/snort/snort.lua"
 
-# Lines to add
+# Lines to add to snort.lua
 line24="HOME_NET = '10.0.1.0/24'"
 line28="EXTERNAL_NET = '!\$HOME_NET'"
 line192=","
@@ -91,16 +100,19 @@ sed -i "193s|.*|$line193|" "$config_file"
 sed -i "195i$line195" "$config_file"
 sed -i "197i$line197" "$config_file"
 
+# Make Snort test rule
 mkdir /var/log/snort
 mkdir /usr/local/etc/rules/local.rules
 cat > /etc/systemd/system/snort3-nic.service << 'EOL'
 alert icmp any any -> $HOME_NET any (msg:"ICMP connection test"; sid:1000001; rev:1;)
 EOL
 
+# Change snort.lua
 config_file="/usr/local/etc/snort/snort.lua"
 line254="alert_fast = { file = true, packet = false, limit = 10 }"
 sed -i "254s|.*|$line254|" "$config_file"
 
+# Snort3 Service
 useradd -r -s /usr/sbin/nologin -M -c SNORT_IDS snort
 cat > /etc/systemd/system/snort3.service << EOL
 [Unit]
@@ -116,24 +128,23 @@ ExecStop=/bin/kill -9 \$MAINPID
 WantedBy=multi-user.target
 EOL
 
+# Enable Snort
 systemctl daemon-reload
 chmod -R 5775 /var/log/snort
 chown -R snort:snort /var/log/snort
 systemctl enable --now snort3
 
-cd /home/ubuntu/snort-source-files/
-touch klaar
-
-## NagiosAgent
+# NagiosAgent
+# Become sudo
 sudo su
 
-# Update systeempakketten
+# Update system
 apt update
 
-# Installeer NRPE
+# Install NRPE
 apt install -y nagios-nrpe-server nagios-plugins
 
-# Configureer NRPE om verbinding te maken met de Nagios-server
+# Configure NRPE connection with NagiosXI
 cat << EOF > /etc/nagios/nrpe.cfg
 # Sample NRPE Configuration File - nrpe.cfg
 
@@ -153,19 +164,14 @@ allowed_hosts=127.0.0.1,10.0.2.11
 # ...
 EOF
 
-# Herstart de NRPE-service
+# Restart NRPE-service
 systemctl restart nagios-nrpe-server
 
-# Ga naar home
-cd /home
-
-# Maak een 'gelukt'-bestand aan
-touch gelukt
-
-## WazuhAgent
+# WazuhAgent
 IP_ADDRESS="10.0.2.10"
 PORT="1514"
 
+# Start install when Wazuh-Manager is on
 function check_port() {
     nc -zv "$IP_ADDRESS" "$PORT" >/dev/null 2>&1
     return $?
@@ -178,6 +184,7 @@ done
 
 echo "The ping to $IP_ADDRESS on port $PORT!" >> /var/log/logfile.txt
 
+# Install Wazuh agent
 curl -so wazuh-agent.deb https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.4.3-1_amd64.deb && sudo WAZUH_MANAGER='10.0.2.10' WAZUH_AGENT_GROUP='default' WAZUH_AGENT_NAME='SnortInstance' dpkg -i ./wazuh-agent.deb
 sudo systemctl daemon-reload
 sudo systemctl enable wazuh-agent

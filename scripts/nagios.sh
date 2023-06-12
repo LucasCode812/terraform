@@ -1,21 +1,16 @@
 #!/bin/bash
 
-
-# Word root
+# Set root user
 sudo su
-# Update systeempakketten
+
+# Update system
 apt update
 
-# Installeer Nagios
+# Install NagiosXI
 curl https://assets.nagios.com/downloads/nagiosxi/install.sh | sh
 
-# Ga naar home
-cd /home
-
-# Maak een 'gelukt'-bestand aan
-touch gelukt
-
-# Voeg de agents toe aan de Nagios-server
+# Add Agents to NagiosXI
+# Webserver
 echo "define host {
   use                 linux-server
   host_name           webserver-agent
@@ -51,6 +46,7 @@ define service {
   check_command       check_nrpe!check_ssh
 }" >> /usr/local/nagios/etc/hosts/webserver.cfg
 
+# Wazuh
 echo "define host {
   use                 linux-server
   host_name           wazuh-agent
@@ -86,6 +82,7 @@ define service {
   check_command       check_nrpe!check_ssh
 }" >> /usr/local/nagios/etc/hosts/wazuh.cfg
 
+# Snort
 echo "define host {
   use                 linux-server
   host_name           snort-agent
@@ -121,6 +118,7 @@ define service {
   check_command       check_nrpe!check_ssh
 }" >> /usr/local/nagios/etc/hosts/snort.cfg
 
+# Active Directory
 echo "define host {
   use                 windows-server
   host_name           ad-agent
@@ -128,20 +126,14 @@ echo "define host {
   address             10.0.2.12
 }" >> /usr/local/nagios/etc/hosts/ad.cfg
 
-
-# Herstart de Nagios-service
+# Restart Nagios-service
 systemctl restart nagios
 
-# Ga naar home
-cd /home
-
-# Maak een 'allesgelukt'-bestand aan
-touch allesgelukt
-
-## WazuhAgent
+# WazuhAgent
 IP_ADDRESS="10.0.2.10"
 PORT="1514"
 
+# Check if Wazuh-Manager is on
 function check_port() {
     nc -zv "$IP_ADDRESS" "$PORT" >/dev/null 2>&1
     return $?
@@ -154,6 +146,7 @@ done
 
 echo "The ping to $IP_ADDRESS on port $PORT!" >> /var/log/logfile.txt
 
+# Install Wazuh Agent
 curl -so wazuh-agent.deb https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.4.3-1_amd64.deb && sudo WAZUH_MANAGER='10.0.2.10' WAZUH_AGENT_GROUP='default' WAZUH_AGENT_NAME='NagiosInstance' dpkg -i ./wazuh-agent.deb
 sudo systemctl daemon-reload
 sudo systemctl enable wazuh-agent

@@ -1,3 +1,4 @@
+# Deploy Snort Inside PublicSubnet
 resource "aws_instance" "snort_instance" {
   ami                         = "ami-053b0d53c279acc90"
   instance_type               = "c4.large"
@@ -18,6 +19,7 @@ resource "aws_instance" "snort_instance" {
   ]
 }
 
+# Define Bashscript
 data "template_file" "snort_data" {
   template = file("${path.module}/scripts/snort.sh")
 }

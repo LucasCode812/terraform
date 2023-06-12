@@ -1,3 +1,4 @@
+# Deploy Webserver Inside PublicSubnet
 resource "aws_instance" "webserver" {
   ami                         = "ami-053b0d53c279acc90"
   instance_type               = "c4.large"
@@ -19,6 +20,7 @@ resource "aws_instance" "webserver" {
 
 }
 
+# Define Bashscript
 data "template_file" "webserver_data" {
   template = file("${path.module}/scripts/webserver.sh")
 }

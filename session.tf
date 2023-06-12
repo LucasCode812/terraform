@@ -1,3 +1,4 @@
+# Create a Traffic Filter
 resource "aws_ec2_traffic_mirror_filter" "my_filter" {
   description      = "My Traffic Mirror Filter"
   network_services = ["amazon-dns"]
@@ -7,6 +8,7 @@ resource "aws_ec2_traffic_mirror_filter" "my_filter" {
   }
 }
 
+# Set Snort as the Traffic Target
 resource "aws_ec2_traffic_mirror_target" "snort_target" {
   network_interface_id = aws_instance.snort_instance.primary_network_interface_id
 
@@ -19,6 +21,7 @@ resource "aws_ec2_traffic_mirror_target" "snort_target" {
   ]
 }
 
+# ActiveDirectory --> Snort Session
 resource "aws_ec2_traffic_mirror_session" "ad_snort" {
   network_interface_id     = aws_instance.ActiveDirectory.primary_network_interface_id
   session_number           = 1
@@ -30,6 +33,7 @@ resource "aws_ec2_traffic_mirror_session" "ad_snort" {
   }
 }
 
+# NagiosXI --> Snort Session
 resource "aws_ec2_traffic_mirror_session" "nagios_snort" {
   network_interface_id     = aws_instance.Nagios.primary_network_interface_id
   session_number           = 2
@@ -41,6 +45,7 @@ resource "aws_ec2_traffic_mirror_session" "nagios_snort" {
   }
 }
 
+# Wazuh-Manager --> Snort Session
 resource "aws_ec2_traffic_mirror_session" "wazuh_snort" {
   network_interface_id     = aws_instance.Wazuh.primary_network_interface_id
   session_number           = 3
@@ -52,6 +57,7 @@ resource "aws_ec2_traffic_mirror_session" "wazuh_snort" {
   }
 }
 
+# WebServer --> Snort Session
 resource "aws_ec2_traffic_mirror_session" "webserver_snort" {
   network_interface_id     = aws_instance.webserver.primary_network_interface_id
   session_number           = 4

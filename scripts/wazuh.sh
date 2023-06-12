@@ -1,17 +1,23 @@
 #!/bin/bash -xe
-  
+
+# Become root
 sudo su
-  
+
+# Install dependencies
 apt-get install apt-transport-https zip unzip lsb-release curl gnupg -y
-  
+
+# Download install key
 curl -s https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/elasticsearch.gpg --import && chmod 644 /usr/share/keyrings/elasticsearch.gpg
   
 echo "deb [signed-by=/usr/share/keyrings/elasticsearch.gpg] https://artifacts.elastic.co/packages/7.x/apt stable main" | tee /etc/apt/sources.list.d/elastic-7.x.list
-  
+
+# Update system 
 apt-get update
-  
+
+# Install elasticsearch
 apt-get install elasticsearch=7.17.9
-  
+
+# Download Elasticsearchs certs
 curl -so /etc/elasticsearch/elasticsearch.yml https://packages.wazuh.com/4.4/tpl/elastic-basic/elasticsearch_all_in_one.yml
   
 curl -so /usr/share/elasticsearch/instances.yml https://packages.wazuh.com/4.4/tpl/elastic-basic/instances_aio.yml
@@ -20,6 +26,7 @@ curl -so /usr/share/elasticsearch/instances.yml https://packages.wazuh.com/4.4/t
   
 unzip ~/certs.zip -d ~/certs
 
+# Set Certs for Elasticsearch
 mkdir /etc/elasticsearch/certs/ca -p
 cp -R ~/certs/ca/ ~/certs/elasticsearch/* /etc/elasticsearch/certs/
 chown -R elasticsearch: /etc/elasticsearch/certs
@@ -27,10 +34,12 @@ chmod -R 500 /etc/elasticsearch/certs
 chmod 400 /etc/elasticsearch/certs/ca/ca.* /etc/elasticsearch/certs/elasticsearch.*
 rm -rf ~/certs/ ~/certs.zip
 
+# Enable Wazuh
 systemctl daemon-reload
 systemctl enable elasticsearch
 systemctl start elasticsearch
 
+# Set passwords
 /usr/share/elasticsearch/bin/elasticsearch-setup-passwords interactive -b << EOF
 Welkom123
 Welkom123
@@ -47,19 +56,21 @@ Welkom123
 Welkom123
 Welkom123
 EOF
-  
+
+# Download Wazuh install key
 curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && chmod 644 /usr/share/keyrings/wazuh.gpg
 echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main" | tee -a /etc/apt/sources.list.d/wazuh.list
 apt-get update
 
+# Install Wazuh-Manager
 apt-get install wazuh-manager
 
+# Enable Wazuh
 systemctl daemon-reload
 systemctl enable wazuh-manager
 systemctl start wazuh-manager
 
-systemctl status wazuh-manager
-
+# Install Filebeat and Configure
 apt-get install filebeat=7.17.9
 curl -so /etc/filebeat/filebeat.yml https://packages.wazuh.com/4.4/tpl/elastic-basic/filebeat_all_in_one.yml
 
@@ -70,16 +81,20 @@ curl -s https://packages.wazuh.com/4.x/filebeat/wazuh-filebeat-0.2.tar.gz | tar 
 
 sed -i 's/output.elasticsearch.password: <elasticsearch_password>/output.elasticsearch.password: Welkom123/' /etc/filebeat/filebeat.yml
 
+# Set Filebeat certs
 cp -r /etc/elasticsearch/certs/ca/ /etc/filebeat/certs/
 cp /etc/elasticsearch/certs/elasticsearch.crt /etc/filebeat/certs/filebeat.crt
 cp /etc/elasticsearch/certs/elasticsearch.key /etc/filebeat/certs/filebeat.key
 
+# Enable Filebeat
 systemctl daemon-reload
 systemctl enable filebeat
 systemctl start filebeat
-  
+
+# Install Kibana
 apt-get install kibana=7.17.9
 
+# Set kibana Certs
 mkdir /etc/kibana/certs/ca -p
 cp -R /etc/elasticsearch/certs/ca/ /etc/kibana/certs/
 cp /etc/elasticsearch/certs/elasticsearch.key /etc/kibana/certs/kibana.key
@@ -90,6 +105,7 @@ chmod 440 /etc/kibana/certs/ca/ca.* /etc/kibana/certs/kibana.*
   
 curl -so /etc/kibana/kibana.yml https://packages.wazuh.com/4.4/tpl/elastic-basic/kibana_all_in_one.yml
 
+# Set passwords
 sed -i 's/elasticsearch.password: <elasticsearch_password>/elasticsearch.password: Welkom123/' /etc/kibana/kibana.yml
 
 mkdir /usr/share/kibana/data
@@ -100,20 +116,22 @@ sudo -u kibana /usr/share/kibana/bin/kibana-plugin install https://packages.wazu
   
 setcap 'cap_net_bind_service=+ep' /usr/share/kibana/node/bin/node
 
+# Enable Kibana
 systemctl daemon-reload
 systemctl enable kibana
 systemctl start kibana
 
-## NagiosAgent
+# NagiosAgent
+# Become sudo
 sudo su
 
-# Update systeempakketten
+# Update system
 apt update
 
-# Installeer NRPE
+# Install NRPE
 apt install -y nagios-nrpe-server nagios-plugins
 
-# Configureer NRPE om verbinding te maken met de Nagios-server
+# Configure NRPE connection with NagiosXI
 cat << EOF > /etc/nagios/nrpe.cfg
 # Sample NRPE Configuration File - nrpe.cfg
 
@@ -133,5 +151,5 @@ allowed_hosts=127.0.0.1,10.0.2.11
 # ...
 EOF
 
-# Herstart de NRPE-service
+# Restart NRPE-service
 systemctl restart nagios-nrpe-server

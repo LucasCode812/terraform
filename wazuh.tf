@@ -1,3 +1,4 @@
+# Deploy Wazuh-Manager Inside PrivateSubnet
 resource "aws_instance" "Wazuh" {
   ami                         = "ami-053b0d53c279acc90"
   instance_type               = "c4.large"
@@ -18,6 +19,7 @@ resource "aws_instance" "Wazuh" {
   ]
 }
 
+# Define Bashscript
 data "template_file" "WazuhData" {
   template = file("${path.module}/scripts/wazuh.sh")
 }

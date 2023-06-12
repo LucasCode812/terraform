@@ -24,6 +24,7 @@ sudo openssl genpkey -algorithm RSA -out /etc/ssl/private/nginx-selfsigned.key
 # generate public key 
 openssl req -new -key /etc/ssl/private/nginx-selfsigned.key -x509 -days 365 -out /etc/ssl/certs/nginx-selfsigned.crt -subj "/CN=localhost"
 
+# Configure Nginx.conf
 echo '
       server {
         listen 80 default_server;
@@ -39,19 +40,20 @@ echo '
           
     ' | sudo tee /etc/nginx/sites-available/default
 
-
+# Restart Nginx
 sudo systemctl restart nginx
 
-## NagiosAgent
+# NagiosAgent
+# Become sudo
 sudo su
 
-# Update systeempakketten
+# Update system
 apt update
 
-# Installeer NRPE
+# Install NRPE
 apt install -y nagios-nrpe-server nagios-plugins
 
-# Configureer NRPE om verbinding te maken met de Nagios-server
+# Configure NRPE connection with NagiosXI
 cat << EOF > /etc/nagios/nrpe.cfg
 # Sample NRPE Configuration File - nrpe.cfg
 
@@ -71,19 +73,14 @@ allowed_hosts=127.0.0.1,10.0.2.11
 # ...
 EOF
 
-# Herstart de NRPE-service
+# Restart NRPE-service
 systemctl restart nagios-nrpe-server
 
-# Ga naar home
-cd /home
-
-# Maak een 'gelukt'-bestand aan
-touch gelukt
-
-## WazuhAgent
+# WazuhAgent
 IP_ADDRESS="10.0.2.10"
 PORT="1514"
 
+# Start install when Wazuh-Manager is on
 function check_port() {
     nc -zv "$IP_ADDRESS" "$PORT" >/dev/null 2>&1
     return $?
@@ -96,6 +93,7 @@ done
 
 echo "The ping to $IP_ADDRESS on port $PORT!" >> /var/log/logfile.txt
 
+# Install Wazuh agent
 curl -so wazuh-agent.deb https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.4.3-1_amd64.deb && sudo WAZUH_MANAGER='10.0.2.10' WAZUH_AGENT_GROUP='default' WAZUH_AGENT_NAME='WebserverInstance' dpkg -i ./wazuh-agent.deb
 sudo systemctl daemon-reload
 sudo systemctl enable wazuh-agent
