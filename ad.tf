@@ -1,7 +1,7 @@
 # Set AWS keypair
 resource "aws_key_pair" "AWS_KEY" {
   key_name   = "RDPKEY"
-  public_key = file("Filepath/TerraformAWS/sshkey/RDPKEY.pub")
+  public_key = file("${path.module}/sshkey/RDPKEY.pub")
 }
 
 # Deploy ActiveDirectory Inside PrivateSubnet

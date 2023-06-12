@@ -1,0 +1,40 @@
+name: CI/CD pipeline Deploy Terraform Infrastrucure
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-terraform:
+    runs-on: ubuntu-latest
+    environment: Development
+
+    steps:
+      - uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{secrets.PAT}}
+          approvers: LucasCode812
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Check Terraform code
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.4.6
+
+      - name: Connect to server and Deploy Infrastructure
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.VM_HOST  }}
+          username: ${{ secrets.VM_USERNAME  }}
+          key: ${{ secrets.VM_KEY }}
+          script: |
+            echo ${{secrets.PAT}}
+            cd /home/ubuntu
+            sudo rm -rf *
+            sudo git clone https://${{secrets.PAT}}@github.com/LucasCode812/terraform.git
+            cd /home/ubuntu/terraform
+            terraform init
+            terraform apply -auto-approve
