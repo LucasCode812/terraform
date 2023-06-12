@@ -87,6 +87,20 @@ resource "aws_security_group" "public_sg" {
   }
 
   ingress {
+    from_port   = 5693
+    to_port     = 5693
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 5666
+    to_port     = 5666
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -96,6 +110,13 @@ resource "aws_security_group" "public_sg" {
   ingress {
     from_port   = 443
     to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 3389
+    to_port     = 3389
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -128,71 +149,87 @@ resource "aws_security_group" "private_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port   = 5693
+    to_port     = 5693
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 5666
+    to_port     = 5666
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 3389
+    to_port     = 3389
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 55000
+    to_port     = 55000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 1515
+    to_port     = 1515
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 5601
+    to_port     = 5601
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 1514
+    to_port     = 1514
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 9200
+    to_port     = 9200
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-resource "aws_instance" "snort_instance" {
-  ami                         = "ami-053b0d53c279acc90"
-  instance_type               = "c4.large"
-  subnet_id                   = aws_subnet.public_subnet.id
-  associate_public_ip_address = true
-  private_ip                  = "10.0.1.20"
-
-  vpc_security_group_ids = [aws_security_group.public_sg.id]
-
-  tags = {
-    Name = "SnortInstance"
-  }
-  user_data = data.template_file.user_data.rendered
-}
-
-data "template_file" "user_data" {
-  template = file("${path.module}/bash.sh")
-}
-
-resource "aws_instance" "test_instance" {
-  ami                         = "ami-053b0d53c279acc90"
-  instance_type               = "c4.large"
-  subnet_id                   = aws_subnet.private_subnet.id
-  associate_public_ip_address = true
-  private_ip                  = "10.0.2.20"
-
-  vpc_security_group_ids = [aws_security_group.private_sg.id]
-
-  tags = {
-    Name = "test"
-  }
-}
-
-resource "aws_ec2_traffic_mirror_filter" "my_filter" {
-  description      = "My Traffic Mirror Filter"
-  network_services = ["amazon-dns"]
-
-  tags = {
-    Name = "MyFilter"
-  }
-}
-
-resource "aws_ec2_traffic_mirror_target" "snort_target" {
-  network_interface_id = aws_instance.snort_instance.primary_network_interface_id
-
-  tags = {
-    Name = "SnortTarget"
-  }
-}
-
-resource "aws_ec2_traffic_mirror_session" "my_session" {
-  network_interface_id     = aws_instance.test_instance.primary_network_interface_id
-  session_number           = 1
-  traffic_mirror_filter_id = aws_ec2_traffic_mirror_filter.my_filter.id
-  traffic_mirror_target_id = aws_ec2_traffic_mirror_target.snort_target.id
-
-  tags = {
-    Name = "MySession"
   }
 }
