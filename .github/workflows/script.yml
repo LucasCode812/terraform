@@ -37,6 +37,6 @@ jobs:
             sudo rm -rf *
             sudo git clone https://${{ secrets.PAT }}@github.com/LucasCode812/terraform.git
             cd /home/ubuntu/terraform
-            terraform init
-            terraform fmt
-            terraform apply -auto-approve
+            sudo terraform init
+            sudo terraform fmt
+            sudo terraform apply -auto-approve
