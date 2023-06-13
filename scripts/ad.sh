@@ -72,7 +72,7 @@ New-LocalUser -Name $accountName -Password $accountPassword -AccountNeverExpires
 $adminGroup = "Administrators"
 Add-LocalGroupMember -Group $adminGroup -Member $accountName
 
-# Wait for creating to finalises 
+# Wait for creating to finalise 
 Start-Sleep -Seconds 
 
 # Import the Server Manager module
