@@ -16,8 +16,8 @@ jobs:
           approvers: LucasCode812
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Check Terraform code
         uses: hashicorp/setup-terraform@v1
@@ -37,4 +37,5 @@ jobs:
             sudo git clone https://${{secrets.PAT}}@github.com/LucasCode812/terraform.git
             cd /home/ubuntu/terraform
             terraform init
+            terraform fmt
             terraform apply -auto-approve
