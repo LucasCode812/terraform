@@ -40,6 +40,35 @@ echo '
           
     ' | sudo tee /etc/nginx/sites-available/default
 
+sudo cat > /usr/share/nginx/html/index.html <<EOF
+<html>
+<head>
+  <style>
+    h1 {
+      color: #5e9ca0;
+      text-align: center;
+    }
+    h2 {
+      color: #2e6c80;
+      text-align: center;
+    }
+    p {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <p><strong><img src="https://www.google.nl/url?sa=i&amp;url=https%3A%2F%2Fwww.possible.today%2Fprototype-sociaal-cv%2Ffontys-logo-svg%2F&amp;psig=AOvVaw1m6do9nB4Qceu0uvf-MG2d&amp;ust=1686519045171000&amp;source=images&amp;cd=vfe&amp;ved=0CBEQjRxqFwoTCNCN0ZfTuf8CFQAAAAAdAAAAABAJ" alt="" /></strong></p>
+  <h1><span style="color: #666699;"><strong>Jouw business website hier!</strong></span></h1>
+  <p><img style="display: block; margin-left: auto; margin-right: auto;" src="https://t3.ftcdn.net/jpg/03/82/64/52/360_F_382645277_6VUaiZuHXtB4OiivCWVQ1DIxqPbu9xv5.jpg" alt="" width="326" height="217" /></p>
+  <h2><span style="color: #808080;"><em>Wat is dit?:</em></span></h2>
+  <p><em>Deze page dient als demo en is onderdeel van Project 'Turnkey Infrastructuur in de Cloud'.</em></p>
+  <p>&nbsp;</p>
+  <p><img style="display: block; margin-left: auto; margin-right: auto;" src="https://www.possible.today/wp-content/uploads/2021/12/Fontys-Logo.svg.png" alt="" width="150" height="76" /></p>
+</body>
+</html>
+EOF
+
 # Restart Nginx
 sudo systemctl restart nginx
 
