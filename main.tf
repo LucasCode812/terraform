@@ -97,27 +97,6 @@ resource "aws_security_group" "public_sg" {
   }
 
   ingress {
-    from_port   = 5693
-    to_port     = 5693
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 5666
-    to_port     = 5666
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
@@ -125,17 +104,10 @@ resource "aws_security_group" "public_sg" {
   }
 
   ingress {
-    from_port   = 3389
-    to_port     = 3389
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = -1
-    to_port     = -1
-    protocol    = "icmp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    security_groups = [aws_security_group.public_sg.id] # Allow internal traffic
   }
 
   egress {
@@ -144,6 +116,7 @@ resource "aws_security_group" "public_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
 }
 
 # Create PrivateSecurityGroup
@@ -161,27 +134,6 @@ resource "aws_security_group" "private_sg" {
   }
 
   ingress {
-    from_port   = 5693
-    to_port     = 5693
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 5666
-    to_port     = 5666
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
@@ -196,45 +148,10 @@ resource "aws_security_group" "private_sg" {
   }
 
   ingress {
-    from_port   = -1
-    to_port     = -1
-    protocol    = "icmp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 55000
-    to_port     = 55000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 1515
-    to_port     = 1515
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 5601
-    to_port     = 5601
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 1514
-    to_port     = 1514
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 9200
-    to_port     = 9200
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    security_groups = [aws_security_group.private_sg.id] # Allow internal traffic
   }
 
   egress {
