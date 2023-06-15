@@ -85,7 +85,7 @@ resource "aws_route_table_association" "private_route_association" {
 # Create PublicSecurityGroup
 resource "aws_security_group" "public_sg" {
   name        = "PublicSecurityGroup"
-  description = "Allow SSH, HTTP, HTTPS, and ICMP traffic"
+  description = "Allow SSH and HTTPS"
 
   vpc_id = aws_vpc.my_vpc.id
 
@@ -115,7 +115,7 @@ resource "aws_security_group" "public_sg" {
 # Create PrivateSecurityGroup
 resource "aws_security_group" "private_sg" {
   name        = "PrivateSecurityGroup"
-  description = "Allow SSH"
+  description = "Allow SSH, HTTPS, RDP and Internal Traffic"
 
   vpc_id = aws_vpc.my_vpc.id
 
@@ -138,6 +138,27 @@ resource "aws_security_group" "private_sg" {
     to_port     = 3389
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 1514
+    to_port     = 1514
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.1.20/32"]
+  }
+
+  ingress {
+    from_port   = 1515
+    to_port     = 1515
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.1.20/32"]
+  }
+
+  ingress {
+    from_port   = 5666
+    to_port     = 5666
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.1.20/32"]
   }
 
   ingress {
