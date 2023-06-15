@@ -103,13 +103,6 @@ resource "aws_security_group" "public_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  ingress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    security_groups = [aws_security_group.public_sg.id] # Allow internal traffic
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -148,10 +141,10 @@ resource "aws_security_group" "private_sg" {
   }
 
   ingress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    security_groups = [aws_security_group.private_sg.id] # Allow internal traffic
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+    self      = true
   }
 
   egress {
