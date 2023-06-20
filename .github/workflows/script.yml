@@ -1,4 +1,4 @@
-name: CI/CD pipeline Deploy Terraform Infrastructure
+name: CI/CD pipeline deploy Terraform Infrastructure
 
 on:
   push:
