@@ -14,7 +14,7 @@ jobs:
         uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.PAT }}
-          approvers: LucasCode812, LuukRaaijmakers, MaxvandeKerkhof, noarezaifontys, rverspaij, Youssefontys
+          approvers: LucasCode812
 
       - name: Checkout
         uses: actions/checkout@v3
